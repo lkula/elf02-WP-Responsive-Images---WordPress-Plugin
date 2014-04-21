@@ -1,6 +1,6 @@
 **elf02 WP Responsive Images - WordPress Plugin**
 
-Responsive image solution using picturefilljs. Base idea from [timevko.com][2].
+Responsive image solution using picturefilljs. Original idea from [timevko.com][2].
 
 This version makes no use of any shortcode. It expands each posted image with a data-responsive attribute. A "the_content" filter replaced such a image with the picturefill.js markup. After deactivating the plugin, all images should appear as normal.
 
