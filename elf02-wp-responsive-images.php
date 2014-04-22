@@ -3,7 +3,7 @@
 /*
 Plugin Name: elf02 WP Responsive Images
 Plugin URI: http://elf02.de/elf02-wp-respo…rdpress-plugin/
-Description: Responsive image solution using picturefilljs. Original idea from http://timevko.com.
+Description: Responsive image solution using picturefilljs. Original idea by http://timevko.com.
 Version: 1.0.0
 Author: ChrisB
 Author URI: http://elf02.de
