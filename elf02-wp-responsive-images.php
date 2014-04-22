@@ -81,11 +81,15 @@ License: MIT
         }
 
         /**
-         * Filter all images with a data-responsive tag
+         * Filter all images with a data-responsive attribute
          */
         public function filter_responsive_images($content) {
+            $regex = ( strpos($content, '<p><img') === false ) ?
+                '#<img.*?data-responsive=[\'"](.*?)[\'"].*?>#' :
+                '#<p><img.*?data-responsive=[\'"](.*?)[\'"].*?></p>#';
+
             $content = preg_replace_callback(
-                '#<img.*?data-responsive=[\'"](.*?)[\'"].*?>#',
+                $regex,
                 array($this, 'replace_responsive_images'),
                 $content
             );
