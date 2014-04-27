@@ -10,7 +10,7 @@ Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original i
 The plugin extends each posted image with a data-responsive attribute. A "the_content" filter replaced such an image with the picturefill.js markup. After deactivating the plugin or removing the data-responsive attribute, all images should appear as normal.
 
 ## Additional
-To regenerate older images after setting your Breakpoints, you can use the Plugin [Regenerate Thumbnails][4]. Be careful: Not yet tested by me!
+To regenerate older images after setting your Breakpoints, you can use the Plugin [Regenerate Thumbnails][4]. Be careful and make first a backup of your images. For me, it works fine.
 
 Plugin Page: [elf02 WP Responsive Images - WordPress Plugin][3]
 
