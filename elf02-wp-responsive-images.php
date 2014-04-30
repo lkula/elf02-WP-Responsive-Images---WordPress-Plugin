@@ -19,7 +19,7 @@ License: MIT
         static private $instance = null;
 
         static public function get_instance() {
-            if(self::$instance === null) {
+            if(NULL === self::$instance) {
                 self::$instance = new self;
             }
             return self::$instance;
@@ -67,10 +67,13 @@ License: MIT
         }
 
         public function init() {
-            // add_image_size from plugin options
+            // add_image_size from options
             add_theme_support('post-thumbnails');
             $options = get_option($this->option_name);
-            $options = ($options === FALSE) ? $this->option_default : $options;
+            $options = (FALSE === $options) ?
+                $this->option_default :
+                $options;
+
             foreach ($options as $key => $value) {
                 add_image_size($value['name'], intval($value['size']));
                 if($value['size2x'] !== '') {
@@ -101,7 +104,9 @@ License: MIT
 
         public function options_do_page() {
             $options = get_option($this->option_name);
-            $options = ($options === FALSE) ? $this->option_default : $options;
+            $options = (FALSE === $options) ?
+                $this->option_default :
+                $options;
             ?>
             <div class="wrap">
                 <h2>Responsive Images Options</h2>
@@ -142,7 +147,7 @@ License: MIT
                             <td colspan="4">
                                 <ul style="padding:10px;border:2px dashed #1e8cbe;">
                                     <li><strong>Notes:</strong></li>
-                                    <li><strong>First Breakpoint must be set.</strong> This is also the Fallback Image and should be the largest one.</li>
+                                    <li><strong>Smallest Breakpoint must be set. This is also the initial Image and must be called "small-img".</strong></li>
                                     <li>"Image Size Retina" is optional and can be blank.</li>
                                     <li>It is not necessary to set all five Breakpoints.</li>
                                     <li><strong>Set all values without an additional "px".</strong></li>
@@ -180,7 +185,7 @@ License: MIT
          * Filter all images with a data-responsive attribute
          */
         public function filter_responsive_images($content) {
-            $regex = ( strpos($content, '<p><img') === false ) ?
+            $regex = (FALSE === strpos($content, '<p><img')) ?
                 '#<img.*?data-responsive=[\'"](.*?)[\'"].*?>#' :
                 '#<p><img.*?data-responsive=[\'"](.*?)[\'"].*?></p>#';
 
@@ -202,7 +207,10 @@ License: MIT
 
             // Images with media querys and breakpoints
             $options = get_option($this->option_name);
-            $options = ($options === FALSE) ? $this->option_default : $options;
+            $options = (FALSE === $options) ?
+                $this->option_default :
+                $options;
+
             foreach ($options as $key => $value) {
 
                 if($value['name'] !== '') {
@@ -213,18 +221,23 @@ License: MIT
                         $imgsrc_retina = wp_get_attachment_image_src($image_id, $str);
                     }
 
-                    $media = ($value['pixel'] === '') ? '' : ' media="(min-width:'. $value['pixel'] .'px)"';
-                    $retina = ($value['size2x'] === '') ? '' : ', '. $imgsrc_retina[0] .' 2x';
-                    $arr[] ='<source srcset="'. $imgsrc[0].$retina .'"'. $media .'>';
+                    $media = ($value['pixel'] === '') ?
+                        '' :
+                        ' media="(min-width:'. $value['pixel'] .'px)"';
 
+                    $retina = ($value['size2x'] === '') ?
+                        '' :
+                        ', '. $imgsrc_retina[0] .' 2x';
+
+                    $arr[] = sprintf('<source srcset="%s"%s>', $imgsrc[0].$retina, $media);
                 }
             }
 
             $markup .= implode($arr);
 
-            // Fallback Image
-            $imgsrc = wp_get_attachment_image_src($image_id, $options['bp1']['name']);
-            $markup .= '<!--[if IE 9]></video><![endif]--><img class="responsive-img" src="'. $imgsrc[0] .'"></picture>';
+            // Initial image
+            $imgsrc = wp_get_attachment_image_src($image_id, 'small-img');
+            $markup .= '<!--[if IE 9]></video><![endif]--><img class="responsive-img" srcset="'. $imgsrc[0] .'"></picture>';
 
             return $markup;
         }
