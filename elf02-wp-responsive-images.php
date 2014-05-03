@@ -136,42 +136,9 @@ class elf02_wp_responsive_images {
         // Sanitize input fields
         foreach($input as $key => $value) {
             $input[$key]['name'] = sanitize_text_field($value['name']);
-
-            if($input[$key]['size'] !== '0') {
-                $input[$key]['size'] = intval($value['size']);
-                if(!$input[$key]['size']) {
-                    add_settings_error(
-                        'elf02WPResponsiveImages-error',
-                        'int-error',
-                        'Number for ('. $input[$key]['name'] .': Image Size) please!',
-                        'error'
-                    );
-                }
-            }
-
-           if($input[$key]['size2x'] !== '0') {
-                $input[$key]['size2x'] = intval($value['size2x']);
-                if(!$input[$key]['size2x']) {
-                    add_settings_error(
-                        'elf02WPResponsiveImages-error',
-                        'int-error',
-                        'Number for ('. $input[$key]['name'] .': Image Size Retina) please!',
-                        'error'
-                    );
-                }
-            }
-
-            if($input[$key]['pixel'] !== '0') {
-                $input[$key]['pixel'] = intval($value['pixel']);
-                if(!$input[$key]['pixel']) {
-                    add_settings_error(
-                        'elf02WPResponsiveImages-error',
-                        'int-error',
-                        'Number for ('. $input[$key]['name'] .': Breakpoint Pixel) please!',
-                        'error'
-                    );
-                }
-            }
+            $input[$key]['size'] = intval($value['size']);
+            $input[$key]['size2x'] = intval($value['size2x']);
+            $input[$key]['pixel'] = intval($value['pixel']);
         }
 
         return $input;
