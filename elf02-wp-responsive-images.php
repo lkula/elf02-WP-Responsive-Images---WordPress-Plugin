@@ -123,16 +123,6 @@ class elf02_wp_responsive_images {
      * Validate and sanitize options
      */
     public function validate($input) {
-        // Check for available small-img breakpoint
-        if(!$this->in_array_r('small-img', $input)) {
-            add_settings_error(
-                'elf02WPResponsiveImages-error',
-                'small-img-error',
-                'Please set a "small-img" breakpoint.',
-                'error'
-            );
-        }
-
         // Sanitize input fields
         foreach($input as $key => $value) {
             $input[$key]['name'] = sanitize_text_field($value['name']);
@@ -154,13 +144,24 @@ class elf02_wp_responsive_images {
             <h2>Responsive Images Options</h2>
             <form method="post" action="options.php">
                 <?php settings_fields('responsive_images_options'); ?>
-                <table class="form-table" style="width:500px;">
+                <table class="widefat" style="width:500px;">
+                <thead>
                     <tr>
                         <th>Breakpoint Name</th>
                         <th>Image Size</th>
                         <th>Image Size Retina</th>
                         <th>Breakpoint Pixel (min-width)</th>
                     </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Breakpoint Name</th>
+                        <th>Image Size</th>
+                        <th>Image Size Retina</th>
+                        <th>Breakpoint Pixel (min-width)</th>
+                    </tr>
+                </tfoot>
+                <tbody>
                     <?php
                         for($i=1; $i<=5; $i++) {
                             echo '<tr>';
@@ -185,37 +186,41 @@ class elf02_wp_responsive_images {
                             echo '</tr>';
                         }
                     ?>
-                    <tr>
-                        <td colspan="4" style="padding:10px;border:2px dashed #1e8cbe;">
-                            <?php
-                                // Check for available small-img breakpoint
-                                if(!$this->in_array_r('small-img', self::$options)) {
-                                    echo '<p style="padding:10px;border: 3px dashed red;"><strong>Error: </strong>Please set a <i>small-img</i> breakpoint.</p>';
-                                }
-
-                                // Output all registered image sizes
-                                echo '<h3>All currently registered image sizes</h3><ul>';
-                                global $_wp_additional_image_sizes;
-                                foreach($_wp_additional_image_sizes as $key => $value) {
-                                    $list[] = (!empty($key)) ?
-                                        sprintf('<li><strong>%s=</strong>%s</li>', $key, $value['width']) :
-                                        '';
-                                }
-                                echo implode($list).'</ul>';
-                            ?>
-                            <h3>Notes</h3>
-                            <ul>
-                                <li><strong>Smallest Breakpoint called <i>small-img</i> must be set for the initial image and should have a value of zero.</strong></li>
-                                <li><i>Image Size Retina</i> is optional and can be zero.</li>
-                                <li>It is not necessary to set all five Breakpoints.</li>
-                            </ul>
-                        </td>
-                    </tr>
+                </tbody>
                 </table>
+                <?php
+                    // Check for available small-img breakpoint
+                    if(!$this->in_array_r('small-img', self::$options)) :
+                ?>
+                    <div id="setting-error-small-img-error-custom" class="error settings-error">
+                        <p><strong>Please set a <em>small-img</em> breakpoint.</strong></p>
+                    </div>
+                <?php
+                    endif;
+                ?>
                 <p class="submit">
                     <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
                 </p>
             </form>
+            <div>
+                <h3>Notes</h3>
+                <ul>
+                    <li><strong>Smallest Breakpoint called <em>small-img</em> must be set for the initial image and should have a <em>Breakpoint Pixel</em> value of zero.</strong></li>
+                    <li><em>Image Size Retina</em> is optional and can be zero.</li>
+                    <li>It is not necessary to set all five Breakpoints.</li>
+                </ul>
+                <?php
+                    // Output all registered image sizes
+                    echo '<h3>All currently registered image sizes</h3><ul>';
+                    global $_wp_additional_image_sizes;
+                    foreach($_wp_additional_image_sizes as $key => $value) {
+                        $list[] = (!empty($key)) ?
+                            sprintf('<li><strong>%s=</strong>%s</li>', $key, $value['width']) :
+                            '';
+                    }
+                    echo implode($list).'</ul>';
+                ?>
+            </div>
         </div>
         <?php
     }
