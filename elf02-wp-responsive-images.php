@@ -254,7 +254,7 @@ class elf02_wp_responsive_images {
         // srcset image markup
         $markup = sprintf('<img src="%s" srcset="%s" sizes="%s100vw">',
             $imgsrc_full[0],
-            trim(implode($srcset), ', '),
+            (isset($srcset)) ? trim(implode($srcset), ', ') : '',
             (isset($mq)) ? implode($mq) : ''
         );
 
