@@ -4,7 +4,7 @@
 Plugin Name: elf02 WP Responsive Images
 Plugin URI: http://elf02.de/elf02-wp-responsive-images-wordpress-plugin/
 Description: Responsive image solution using picturefilljs. Original idea by timevko.com.
-Version: 1.2.2
+Version: 1.3.0
 Author: ChrisB & Martin Wolf
 Author URI: http://elf02.de
 License: MIT
@@ -31,32 +31,32 @@ class elf02_wp_responsive_images {
         'bp1' => array(
             'name' => 'large-img',
             'size' => '1100',
-            'size2x' => '1600',
-            'pixel' => '769'
+            'size2x' => '0',
+            'bp_pixel' => '769'
         ),
         'bp2' => array(
             'name' => 'medium-img',
             'size' => '768',
-            'size2x' => '1536',
-            'pixel' => '321'
+            'size2x' => '0',
+            'bp_pixel' => '321'
         ),
         'bp3' => array(
             'name' => 'small-img',
             'size' => '320',
-            'size2x' => '640',
-            'pixel' => '0'
+            'size2x' => '0',
+            'bp_pixel' => '0'
         ),
         'bp4' => array(
             'name' => '',
             'size' => '0',
             'size2x' => '0',
-            'pixel' => '0'
+            'bp_pixel' => '0'
         ),
         'bp5' => array(
             'name' => '',
             'size' => '0',
             'size2x' => '0',
-            'pixel' => '0'
+            'bp_pixel' => '0'
         )
     );
 
@@ -78,13 +78,17 @@ class elf02_wp_responsive_images {
             self::$options_default :
             $wp_options;
 
+
         foreach(self::$options as $key => $value) {
             if(!empty($value['name']) && !empty($value['size'])) {
-                add_image_size($value['name'], intval($value['size']));
-                if(!empty($value['size2x'])) {
-                    $str = $value['name'].'@2x';
-                    add_image_size($str, intval($value['size2x']));
-                }
+                $size = intval($value['size']);
+                add_image_size($value['name'], $size);
+
+                // Very secret and magical pixel calculation
+                $size2x = $size * 2;
+                $name2x = $value['name'].'@2x';
+                self::$options[$key]['size2x'] = $size2x;
+                add_image_size($name2x, $size2x);
             }
         }
 
@@ -93,18 +97,6 @@ class elf02_wp_responsive_images {
         add_filter('the_content', array($this, 'filter_responsive_images'));
         add_action('admin_init', array($this, 'init_options'));
         add_action('admin_menu', array($this, 'init_options_page'));
-    }
-
-    /**
-     * The Needle and the Haystack
-     */
-    private function in_array_r($needle, $haystack) {
-        foreach ($haystack as $item) {
-            if(($item === $needle) || (is_array($item) && $this->in_array_r($needle, $item))) {
-                return true;
-            }
-        }
-        return false;
     }
 
 
@@ -119,6 +111,7 @@ class elf02_wp_responsive_images {
         add_options_page('Responsive Images Options', 'Responsive Images', 'manage_options', 'responsive_images_options', array($this, 'options_do_page'));
     }
 
+
     /**
      * Validate and sanitize options
      */
@@ -127,8 +120,7 @@ class elf02_wp_responsive_images {
         foreach($input as $key => $value) {
             $input[$key]['name'] = sanitize_text_field($value['name']);
             $input[$key]['size'] = intval($value['size']);
-            $input[$key]['size2x'] = intval($value['size2x']);
-            $input[$key]['pixel'] = intval($value['pixel']);
+            $input[$key]['bp_pixel'] = intval($value['bp_pixel']);
         }
 
         return $input;
@@ -149,7 +141,6 @@ class elf02_wp_responsive_images {
                     <tr>
                         <th>Breakpoint Name</th>
                         <th>Image Size</th>
-                        <th>Image Size Retina</th>
                         <th>Breakpoint Pixel (min-width)</th>
                     </tr>
                 </thead>
@@ -157,7 +148,6 @@ class elf02_wp_responsive_images {
                     <tr>
                         <th>Breakpoint Name</th>
                         <th>Image Size</th>
-                        <th>Image Size Retina</th>
                         <th>Breakpoint Pixel (min-width)</th>
                     </tr>
                 </tfoot>
@@ -175,12 +165,8 @@ class elf02_wp_responsive_images {
                             $str3 = self::$options[$str1]['size'];
                             printf('<td><input type="text" name="%s" value="%s" /></td>', $str2, $str3);
 
-                            $str2 = self::$options_name . '['. $str1 .'][size2x]';
-                            $str3 = self::$options[$str1]['size2x'];
-                            printf('<td><input type="text" name="%s" value="%s" /></td>', $str2, $str3);
-
-                            $str2 = self::$options_name . '['. $str1 .'][pixel]';
-                            $str3 = self::$options[$str1]['pixel'];
+                            $str2 = self::$options_name . '['. $str1 .'][bp_pixel]';
+                            $str3 = self::$options[$str1]['bp_pixel'];
                             printf('<td><input type="text" name="%s" value="%s" /></td>', $str2, $str3);
 
                             echo '</tr>';
@@ -188,27 +174,11 @@ class elf02_wp_responsive_images {
                     ?>
                 </tbody>
                 </table>
-                <?php
-                    // Check for available small-img breakpoint
-                    if(!$this->in_array_r('small-img', self::$options)) :
-                ?>
-                    <div id="setting-error-small-img-error-custom" class="error settings-error">
-                        <p><strong>Please set a <em>small-img</em> breakpoint.</strong></p>
-                    </div>
-                <?php
-                    endif;
-                ?>
                 <p class="submit">
                     <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
                 </p>
             </form>
             <div>
-                <h3>Notes</h3>
-                <ul>
-                    <li><strong>Smallest Breakpoint called <em>small-img</em> must be set for the initial image and should have a <em>Breakpoint Pixel</em> value of zero.</strong></li>
-                    <li><em>Image Size Retina</em> is optional and can be zero.</li>
-                    <li>It is not necessary to set all five Breakpoints.</li>
-                </ul>
                 <?php
                     // Output all registered image sizes
                     echo '<h3>All currently registered image sizes</h3><ul>';
@@ -246,8 +216,8 @@ class elf02_wp_responsive_images {
      * Filter all images with a data-responsive attribute
      */
     public function filter_responsive_images($content) {
-        // Check for available small-img breakpoint and empty options
-        if(!$this->in_array_r('small-img', self::$options) || empty(self::$options)) return $content;
+        // Check for empty options
+        if(empty(self::$options)) return $content;
 
         $content = preg_replace_callback(
             '#(?:<p><img|<img).*?data-responsive=[\'"](.*?)[\'"].*?(?:>(?!</p>)|</p>)#imsu',
@@ -259,43 +229,35 @@ class elf02_wp_responsive_images {
     }
 
     /**
-     * Replace images with picturefill.js markup
+     * Replace images with srcset image markup
      */
     public function replace_responsive_images($matches) {
         $image_id = intval($matches[1]);
         // Check for invalid image id
         if(!$image_id) return $matches[0];
 
-        $markup = '<picture><!--[if IE 9]><video style="display: none;"><![endif]-->';
-
-        // Output all images with the picturefill markup
+        // Collect all images
         foreach(self::$options as $key => $value) {
-
             if(!empty($value['name'])) {
-
                 $imgsrc = wp_get_attachment_image_src($image_id, $value['name']);
-                if(!empty($value['size2x'])) {
-                    $str = $value['name'].'@2x';
-                    $imgsrc_retina = wp_get_attachment_image_src($image_id, $str);
+                $imgsrc_2x = wp_get_attachment_image_src($image_id, $value['name'].'@2x');
+                $srcset[] = sprintf('%s %sw, %s %sw, ', $imgsrc[0], $value['size'], $imgsrc_2x[0], $value['size2x']);
+                if(!empty($value['bp_pixel'])) {
+                    $mq[] = sprintf('(min-width: %spx) %spx, ', $value['bp_pixel'], $value['size']);
                 }
-
-                $media = (empty($value['pixel'])) ?
-                    '' :
-                    ' media="(min-width:'. $value['pixel'] .'px)"';
-
-                $retina = (empty($value['size2x'])) ?
-                    '' :
-                    ', '. $imgsrc_retina[0] .' 2x';
-
-                $arr[] = sprintf('<source srcset="%s"%s>', $imgsrc[0].$retina, $media);
             }
         }
 
-        $markup .= implode($arr);
+        // Full size image as fallback
+        $imgsrc_full = wp_get_attachment_image_src($image_id, 'full');
 
-        // Initial image
-        $imgsrc = wp_get_attachment_image_src($image_id, 'small-img');
-        $markup .= '<!--[if IE 9]></video><![endif]--><img class="responsive-img" srcset="'. $imgsrc[0] .'"></picture>';
+        // srcset image markup
+        $markup = sprintf('<img src="%s" srcset="%s" sizes="%s100vw">',
+            $imgsrc_full[0],
+            trim(implode($srcset), ', '),
+            (isset($mq)) ? implode($mq) : ''
+        );
+
 
         return $markup;
     }

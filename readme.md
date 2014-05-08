@@ -2,6 +2,11 @@
 
 Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original idea by [Tim Evko][2].
 
+## New version 1.3.0
+* Simplified srcset syntax.
+* Automatically added 2x image sizes.
+* Top Notch backend styling.
+
 ## New version 1.2.2
 * Better security approaches.
 * Improved regex and a list off all in WordPress registered breakpoints
