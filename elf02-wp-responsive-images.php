@@ -220,7 +220,7 @@ class elf02_wp_responsive_images {
         if(empty(self::$options)) return $content;
 
         $content = preg_replace_callback(
-            '#(?:<p><img|<img).*?data-responsive=[\'"](.*?)[\'"].*?(?:>(?!</p>)|</p>)#imsu',
+            '#<img.*?data-responsive=[\'"](.*?)[\'"](?:.*?class=[\'"](.*?)[\'"].*?)?.*?>#imsu',
             array($this, 'replace_responsive_images'),
             $content
         );
@@ -233,8 +233,14 @@ class elf02_wp_responsive_images {
      */
     public function replace_responsive_images($matches) {
         $image_id = intval($matches[1]);
+
         // Check for invalid image id
         if(!$image_id) return $matches[0];
+
+        // Get class names
+        $class_names = (!empty($matches[2])) ?
+            $matches[2] :
+            '';
 
         // Collect all images
         foreach(self::$options as $key => $value) {
@@ -252,7 +258,8 @@ class elf02_wp_responsive_images {
         $imgsrc_full = wp_get_attachment_image_src($image_id, 'full');
 
         // srcset image markup
-        $markup = sprintf('<img src="%s" srcset="%s" sizes="%s100vw">',
+        $markup = sprintf('<img class="%s" src="%s" srcset="%s" sizes="%s100vw">',
+            $class_names,
             $imgsrc_full[0],
             (isset($srcset)) ? trim(implode($srcset), ', ') : '',
             (isset($mq)) ? implode($mq) : ''
