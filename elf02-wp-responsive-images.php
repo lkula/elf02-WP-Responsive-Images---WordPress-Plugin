@@ -27,7 +27,7 @@ class elf02_wp_responsive_images {
     /**
      * Five default Breakpoints
      */
-    private static $options_default = array(
+    protected static $options_default = array(
         'bp1' => array(
             'name' => 'large-img',
             'size' => '1100',
@@ -60,7 +60,7 @@ class elf02_wp_responsive_images {
         )
     );
 
-    private static $options_name = 'elf02_wp_responsive_images';
+    protected static $options_name = 'elf02_wp_responsive_images';
     private static $options = array();
 
 
