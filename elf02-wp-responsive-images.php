@@ -4,7 +4,7 @@
 Plugin Name: elf02 WP Responsive Images
 Plugin URI: http://elf02.de/elf02-wp-responsive-images-wordpress-plugin/
 Description: Responsive image solution using picturefilljs. Original idea by timevko.com.
-Version: 1.3.0
+Version: 1.3.1
 Author: ChrisB & Martin Wolf
 Author URI: http://elf02.de
 License: MIT
@@ -57,7 +57,8 @@ class elf02_wp_responsive_images {
             'size' => '0',
             'size2x' => '0',
             'bp_pixel' => '0'
-        )
+        ),
+        '_fallback' => 0
     );
 
     protected static $options_name = 'elf02_wp_responsive_images';
@@ -73,14 +74,13 @@ class elf02_wp_responsive_images {
      */
     public function init() {
         add_theme_support('post-thumbnails');
-        $wp_options = get_option(self::$options_name);
-        self::$options = (FALSE === $wp_options) ?
-            self::$options_default :
-            $wp_options;
 
+        self::$options = wp_parse_args(
+            get_option(self::$options_name),
+            self::$options_default);
 
         foreach(self::$options as $key => $value) {
-            if(!empty($value['name']) && !empty($value['size'])) {
+            if(substr($key, 0, 1) != '_' && !empty($value['name']) && !empty($value['size'])) {
                 $size = intval($value['size']);
                 add_image_size($value['name'], $size);
 
@@ -118,10 +118,14 @@ class elf02_wp_responsive_images {
     public function validate($input) {
         // Sanitize input fields
         foreach($input as $key => $value) {
-            $input[$key]['name'] = sanitize_text_field($value['name']);
-            $input[$key]['size'] = intval($value['size']);
-            $input[$key]['bp_pixel'] = intval($value['bp_pixel']);
+            if(substr($key, 0, 1) != '_') {
+                $input[$key]['name'] = sanitize_text_field($value['name']);
+                $input[$key]['size'] = intval($value['size']);
+                $input[$key]['bp_pixel'] = intval($value['bp_pixel']);
+            }
         }
+
+        $input['_fallback'] = intval($input['_fallback']);
 
         return $input;
     }
@@ -159,21 +163,29 @@ class elf02_wp_responsive_images {
                             $str1 = 'bp'.$i;
                             $str2 = self::$options_name . '['. $str1 .'][name]';
                             $str3 = self::$options[$str1]['name'];
-                            printf('<td><input type="text" name="%s" value="%s" /></td>', $str2, $str3);
+                            printf('<td><input type="text" name="%s" value="%s"></td>', $str2, $str3);
 
                             $str2 = self::$options_name . '['. $str1 .'][size]';
                             $str3 = self::$options[$str1]['size'];
-                            printf('<td><input type="text" name="%s" value="%s" /></td>', $str2, $str3);
+                            printf('<td><input type="text" name="%s" value="%s"></td>', $str2, $str3);
 
                             $str2 = self::$options_name . '['. $str1 .'][bp_pixel]';
                             $str3 = self::$options[$str1]['bp_pixel'];
-                            printf('<td><input type="text" name="%s" value="%s" /></td>', $str2, $str3);
+                            printf('<td><input type="text" name="%s" value="%s"></td>', $str2, $str3);
 
                             echo '</tr>';
                         }
                     ?>
                 </tbody>
                 </table>
+                <div style="margin-top: 20px;">
+                    <label for="cb_fallback">
+                    <?php
+                        printf('<input id="cb_fallback" type="checkbox" name="%s" value="1" %s>', self::$options_name.'[_fallback]', checked(self::$options['_fallback'], 1, false));
+                    ?>
+                    Use full size image as fallback?
+                    </label>
+                </div>
                 <p class="submit">
                     <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
                 </p>
@@ -244,7 +256,7 @@ class elf02_wp_responsive_images {
 
         // Collect all images
         foreach(self::$options as $key => $value) {
-            if(!empty($value['name'])) {
+            if(substr($key, 0, 1) != '_' && !empty($value['name'])) {
                 $imgsrc = wp_get_attachment_image_src($image_id, $value['name']);
                 $imgsrc_2x = wp_get_attachment_image_src($image_id, $value['name'].'@2x');
                 $srcset[] = sprintf('%s %sw, %s %sw, ', $imgsrc[0], $value['size'], $imgsrc_2x[0], $value['size2x']);
@@ -254,13 +266,16 @@ class elf02_wp_responsive_images {
             }
         }
 
-        // Full size image as fallback
-        $imgsrc_full = wp_get_attachment_image_src($image_id, 'full');
+        $img_fallback = '';
+        if(self::$options['_fallback']) {
+            $imgsrc_full = wp_get_attachment_image_src($image_id, 'full');
+            $img_fallback = sprintf(' src="%s"', $imgsrc_full[0]);
+        }
 
         // srcset image markup
-        $markup = sprintf('<img class="%s" src="%s" srcset="%s" sizes="%s100vw">',
+        $markup = sprintf('<img class="%s"%s srcset="%s" sizes="%s100vw">',
             $class_names,
-            $imgsrc_full[0],
+            $img_fallback,
             (isset($srcset)) ? trim(implode($srcset), ', ') : '',
             (isset($mq)) ? implode($mq) : ''
         );

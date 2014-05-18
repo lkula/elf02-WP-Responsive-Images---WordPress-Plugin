@@ -2,6 +2,9 @@
 
 Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original idea by [Tim Evko][2].
 
+## New version 1.3.1
+* Full size image fallback now is an option.
+
 ## New version 1.3.0
 * Simplified srcset syntax.
 * Automatically added 2x image sizes.
@@ -26,7 +29,7 @@ Plugin Page: [elf02 WP Responsive Images - WordPress Plugin][3]
 
   [1]: http://scottjehl.github.io/picturefill/
   [2]: https://github.com/tevko/wp-tevko-responsive-images
-  [3]: http://elf02.de/elf02-wp-responsive-images-wordpress-plugin/
+  [3]: http://elf02.de/2014/04/22/elf02-wp-responsive-images-wordpress-plugin/
   [4]: http://wordpress.org/plugins/regenerate-thumbnails/
   [5]: http://visuellegedanken.de/
   [6]: https://github.com/scottjehl/picturefill/releases/tag/2.0.0
