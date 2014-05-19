@@ -1,31 +1,9 @@
 <?php
 
-/*
-Plugin Name: elf02 WP Responsive Images
-Plugin URI: http://elf02.de/elf02-wp-responsive-images-wordpress-plugin/
-Description: Responsive image solution using picturefilljs. Original idea by timevko.com.
-Version: 1.3.1
-Author: ChrisB & Martin Wolf
-Author URI: http://elf02.de
-License: MIT
-*/
-
-
-elf02_wp_responsive_images::get_instance();
-
-class elf02_wp_responsive_images {
-
-    private static $instance = null;
-
-    public static function get_instance() {
-        if(NULL === self::$instance) {
-            self::$instance = new self;
-        }
-        return self::$instance;
-    }
+final class elf02_wp_responsive_images {
 
     /**
-     * Five default Breakpoints
+     * Default options
      */
     protected static $options_default = array(
         'bp1' => array(
@@ -65,19 +43,29 @@ class elf02_wp_responsive_images {
     private static $options = array();
 
 
-    private function __construct() {
-        add_action('plugins_loaded', array($this, 'init'));
+    /**
+     * Singleton
+     */
+    private static $instance = null;
+
+    public static function instance() {
+        if(NULL === self::$instance) {
+            self::$instance = new self;
+        }
+        return self::$instance;
     }
 
+
     /**
-     * Init plugin, load options and set image sizes
+     * Init plugin, load options, set image sizes, set filters and actions
      */
-    public function init() {
+    private function __construct() {
         add_theme_support('post-thumbnails');
 
         self::$options = wp_parse_args(
             get_option(self::$options_name),
-            self::$options_default);
+            self::$options_default
+        );
 
         foreach(self::$options as $key => $value) {
             if(substr($key, 0, 1) != '_' && !empty($value['name']) && !empty($value['size'])) {
@@ -92,11 +80,48 @@ class elf02_wp_responsive_images {
             }
         }
 
-        add_action('wp_enqueue_scripts', array($this, 'add_picturefilljs'));
-        add_filter('image_send_to_editor', array($this, 'insert_image_with_id'), 10, 9);
-        add_filter('the_content', array($this, 'filter_responsive_images'));
-        add_action('admin_init', array($this, 'init_options'));
-        add_action('admin_menu', array($this, 'init_options_page'));
+        add_action(
+            'wp_enqueue_scripts',
+            array(
+                $this,
+                'add_picturefilljs'
+            )
+        );
+
+        add_filter(
+            'image_send_to_editor',
+            array(
+                $this,
+                'insert_image_with_id'
+            ),
+            10,
+            9
+        );
+
+        add_filter(
+            'the_content',
+            array(
+                $this,
+                'filter_responsive_images'
+            ),
+            99
+        );
+
+        add_action(
+            'admin_init',
+            array(
+                $this,
+                'init_options'
+            )
+        );
+
+        add_action(
+            'admin_menu',
+            array(
+                $this,
+                'init_options_page'
+            )
+        );
     }
 
 
@@ -104,11 +129,27 @@ class elf02_wp_responsive_images {
      * Options Page handling
      */
     public function init_options() {
-        register_setting('responsive_images_options', self::$options_name, array($this, 'validate'));
+        register_setting(
+            'responsive_images_options',
+            self::$options_name,
+            array(
+                $this,
+                'validate'
+            )
+        );
     }
 
     public function init_options_page() {
-        add_options_page('Responsive Images Options', 'Responsive Images', 'manage_options', 'responsive_images_options', array($this, 'options_do_page'));
+        add_options_page(
+            'Responsive Images Options',
+            'Responsive Images',
+            'manage_options',
+            'responsive_images_options',
+            array(
+                $this,
+                'options_do_page'
+            )
+        );
     }
 
 
@@ -116,7 +157,6 @@ class elf02_wp_responsive_images {
      * Validate and sanitize options
      */
     public function validate($input) {
-        // Sanitize input fields
         foreach($input as $key => $value) {
             if(substr($key, 0, 1) != '_') {
                 $input[$key]['name'] = sanitize_text_field($value['name']);
@@ -183,7 +223,7 @@ class elf02_wp_responsive_images {
                     <?php
                         printf('<input id="cb_fallback" type="checkbox" name="%s" value="1" %s>', self::$options_name.'[_fallback]', checked(self::$options['_fallback'], 1, false));
                     ?>
-                    Use full size image as fallback?
+                        Use full size image as fallback?
                     </label>
                 </div>
                 <p class="submit">
@@ -212,15 +252,27 @@ class elf02_wp_responsive_images {
      * @author picturefill.js http://scottjehl.github.io/picturefill/
      */
     public function add_picturefilljs() {
-        wp_register_script('picturefill', plugins_url('/js/picturefill.min.js', __FILE__), array(), null);
+        wp_register_script(
+            'picturefill',
+            plugins_url(
+                '/js/picturefill.min.js',
+                PLUGIN_FILE
+            ),
+            array(),
+            null
+        );
         wp_enqueue_script('picturefill');
     }
 
     /**
-     * data-responsive attribute with id added to all images
+     * Add data-responsive attribute
      */
     public function insert_image_with_id($html, $id, $caption, $title, $align, $url) {
-        $html = str_replace('<img', '<img data-responsive="'. $id .'"', $html);
+        $html = str_replace(
+            '<img',
+            sprintf('<img data-responsive="%s"', $id),
+            $html
+        );
         return $html;
     }
 
@@ -233,7 +285,10 @@ class elf02_wp_responsive_images {
 
         $content = preg_replace_callback(
             '#<img.*?data-responsive=[\'"](.*?)[\'"](?:.*?class=[\'"](.*?)[\'"].*?)?.*?>#imsu',
-            array($this, 'replace_responsive_images'),
+            array(
+                $this,
+                'replace_responsive_images'
+            ),
             $content
         );
 
