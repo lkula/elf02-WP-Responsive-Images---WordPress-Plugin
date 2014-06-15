@@ -15,17 +15,17 @@ define('PLUGIN_FILE', __FILE__);
 add_action(
     'plugins_loaded',
     array(
-        'elf02_wp_responsive_images',
+        'wpri_base',
         'instance'
     ),
     99
 );
 
 
-spl_autoload_register('elf02_autoload');
+spl_autoload_register('wpri_autoload');
 
-function elf02_autoload($class) {
-    if(substr($class, 0, 6) === 'elf02_') {
+function wpri_autoload($class) {
+    if(substr($class, 0, 5) === 'wpri_') {
         require_once(
             sprintf(
                 '%s/inc/%s.class.php',

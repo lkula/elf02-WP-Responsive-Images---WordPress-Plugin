@@ -1,6 +1,6 @@
 <?php
 
-final class elf02_wp_responsive_images {
+final class wpri_base {
 
     /**
      * Default options

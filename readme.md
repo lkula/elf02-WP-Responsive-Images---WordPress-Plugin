@@ -3,7 +3,7 @@
 Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original idea by [Tim Evko][2].
 
 ## New version 1.3.1
-* Full size image fallback now is an option.
+* Optional full size image fallback.
 
 ## New version 1.3.0
 * Simplified srcset syntax.
