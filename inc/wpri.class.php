@@ -1,6 +1,6 @@
 <?php
 
-final class wpri_base {
+final class wpri {
 
     /**
      * Default options

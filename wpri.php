@@ -12,29 +12,22 @@ License: MIT
 
 define('PLUGIN_FILE', __FILE__);
 
+require_once(
+    sprintf(
+        '%s/inc/%s.class.php',
+        dirname(__FILE__),
+        'wpri'
+    )
+);
+
+
 add_action(
     'plugins_loaded',
     array(
-        'wpri_base',
+        'wpri',
         'instance'
     ),
     99
 );
-
-
-spl_autoload_register('wpri_autoload');
-
-function wpri_autoload($class) {
-    if(substr($class, 0, 5) === 'wpri_') {
-        require_once(
-            sprintf(
-                '%s/inc/%s.class.php',
-                dirname(__FILE__),
-                strtolower($class)
-            )
-        );
-    }
-}
-
 
 ?>
