@@ -256,7 +256,7 @@ final class wpri {
             'picturefill',
             plugins_url(
                 '/js/picturefill.min.js',
-                PLUGIN_FILE
+                PLUGIN_FILE_WPRI
             ),
             array(),
             null

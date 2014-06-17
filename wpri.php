@@ -10,7 +10,7 @@ Author URI: http://elf02.de
 License: MIT
 */
 
-define('PLUGIN_FILE', __FILE__);
+define('PLUGIN_FILE_WPRI', __FILE__);
 
 require_once(
     sprintf(
