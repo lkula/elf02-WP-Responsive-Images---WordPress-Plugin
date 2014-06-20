@@ -1,11 +1,14 @@
 <?php
 
+defined('ABSPATH') OR exit;
+
+
 final class wpri {
 
     /**
      * Default options
      */
-    protected static $options_default = array(
+    private static $options_default = array(
         'bp1' => array(
             'name' => 'large-img',
             'size' => '1100',
@@ -39,7 +42,7 @@ final class wpri {
         '_fallback' => 0
     );
 
-    protected static $options_name = 'elf02_wp_responsive_images';
+    private static $options_name = 'elf02_wp_responsive_images';
     private static $options = array();
 
 
@@ -116,6 +119,14 @@ final class wpri {
         );
 
         add_action(
+            'admin_init',
+            array(
+                $this,
+                'register_textdomain'
+            )
+        );
+
+        add_action(
             'admin_menu',
             array(
                 $this,
@@ -138,6 +149,20 @@ final class wpri {
             )
         );
     }
+
+
+    /**
+     * Translation
+     */
+    public function register_textdomain()
+    {
+        load_plugin_textdomain(
+            'wpri',
+            false,
+            'elf02-wp-responsive-images/lang'
+        );
+    }
+
 
     public function init_options_page() {
         add_options_page(
@@ -177,24 +202,17 @@ final class wpri {
     public function options_do_page() {
         ?>
         <div class="wrap">
-            <h2>Responsive Images Options</h2>
+            <h2><?php _e('Responsive Images Options', 'wpri'); ?></h2>
             <form method="post" action="options.php">
                 <?php settings_fields('responsive_images_options'); ?>
                 <table class="widefat" style="width:500px;">
                 <thead>
                     <tr>
-                        <th>Breakpoint Name</th>
-                        <th>Image Size</th>
-                        <th>Breakpoint Pixel (min-width)</th>
+                        <th><?php _e('Breakpoint Name', 'wpri'); ?></th>
+                        <th><?php _e('Image Size (width)', 'wpri'); ?></th>
+                        <th><?php _e('Breakpoint Pixel (min-width)', 'wpri'); ?></th>
                     </tr>
                 </thead>
-                <tfoot>
-                    <tr>
-                        <th>Breakpoint Name</th>
-                        <th>Image Size</th>
-                        <th>Breakpoint Pixel (min-width)</th>
-                    </tr>
-                </tfoot>
                 <tbody>
                     <?php
                         for($i=1; $i<=5; $i++) {
@@ -222,18 +240,18 @@ final class wpri {
                     <label for="cb_fallback">
                     <?php
                         printf('<input id="cb_fallback" type="checkbox" name="%s" value="1" %s>', self::$options_name.'[_fallback]', checked(self::$options['_fallback'], 1, false));
+                        _e('Use full size image as fallback?', 'wpri');
                     ?>
-                        Use full size image as fallback?
                     </label>
                 </div>
                 <p class="submit">
-                    <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
+                    <input type="submit" class="button-primary" value="<?php _e('Save Changes', 'wpri'); ?>" />
                 </p>
             </form>
             <div>
                 <?php
                     // Output all registered image sizes
-                    echo '<h3>All currently registered image sizes</h3><ul>';
+                    printf('<h3>%s</h3><ul>', __('Registered image sizes', 'wpri'));
                     global $_wp_additional_image_sizes;
                     foreach($_wp_additional_image_sizes as $key => $value) {
                         $list[] = (!empty($key)) ?
@@ -301,8 +319,8 @@ final class wpri {
     public function replace_responsive_images($matches) {
         $image_id = intval($matches[1]);
 
-        // Check for invalid image id
-        if(!$image_id) return $matches[0];
+        // Check image id
+        if(empty($image_id)) return $matches[0];
 
         // Get class names
         $class_names = (!empty($matches[2])) ?

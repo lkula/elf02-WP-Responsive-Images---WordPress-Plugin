@@ -2,20 +2,23 @@
 
 Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original idea by [Tim Evko][2].
 
-## New version 1.3.1
+## New in version 1.3.2
+* de_DE translation
+
+## New in version 1.3.1
 * Optional full size image fallback.
 
-## New version 1.3.0
+## New in version 1.3.0
 * Simplified srcset syntax.
 * Automatically added 2x image sizes.
 * Top Notch backend styling.
 
-## New version 1.2.2
+## New in version 1.2.2
 * Better security approaches.
 * Improved regex and a list off all in WordPress registered breakpoints
 * Update to [Picturefill 2.0.0 Stable][6]
 
-## New version 1.2.1
+## New in version 1.2.1
 * Add enhanced code for Retina Images by [Martin Wolf][5]
 * New Options Page for easy control over five breakpoints.
 
