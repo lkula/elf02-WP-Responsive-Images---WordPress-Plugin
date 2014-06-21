@@ -29,8 +29,7 @@ add_action(
     array(
         'wpri',
         'instance'
-    ),
-    99
+    )
 );
 
 ?>
