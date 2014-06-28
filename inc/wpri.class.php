@@ -39,7 +39,8 @@ final class wpri {
             'size2x' => '0',
             'bp_pixel' => '0'
         ),
-        '_fallback' => 0
+        '_fallback' => 0,
+        '_native' => 0
     );
 
     private static $options_name = 'elf02_wp_responsive_images';
@@ -83,13 +84,15 @@ final class wpri {
             }
         }
 
-        add_action(
-            'wp_enqueue_scripts',
-            array(
-                $this,
-                'add_picturefilljs'
-            )
-        );
+        if(!self::$options['_native']) {
+            add_action(
+                'wp_enqueue_scripts',
+                array(
+                    $this,
+                    'add_picturefilljs'
+                )
+            );
+        }
 
         add_filter(
             'image_send_to_editor',
@@ -119,14 +122,6 @@ final class wpri {
         );
 
         add_action(
-            'admin_init',
-            array(
-                $this,
-                'register_textdomain'
-            )
-        );
-
-        add_action(
             'admin_menu',
             array(
                 $this,
@@ -147,19 +142,6 @@ final class wpri {
                 $this,
                 'validate'
             )
-        );
-    }
-
-
-    /**
-     * Translation
-     */
-    public function register_textdomain()
-    {
-        load_plugin_textdomain(
-            'wpri',
-            false,
-            'elf02-wp-responsive-images/lang'
         );
     }
 
@@ -191,6 +173,7 @@ final class wpri {
         }
 
         $input['_fallback'] = intval($input['_fallback']);
+        $input['_native'] = intval($input['_native']);
 
         return $input;
     }
@@ -237,12 +220,28 @@ final class wpri {
                 </tbody>
                 </table>
                 <div style="margin-top: 20px;">
-                    <label for="cb_fallback">
-                    <?php
-                        printf('<input id="cb_fallback" type="checkbox" name="%s" value="1" %s>', self::$options_name.'[_fallback]', checked(self::$options['_fallback'], 1, false));
-                        _e('Use full size image as fallback?', 'wpri');
-                    ?>
-                    </label>
+                    <p>
+                        <label for="cb_fallback">
+                        <?php
+                            printf('<input id="cb_fallback" type="checkbox" name="%s" value="1" %s>',
+                                self::$options_name.'[_fallback]',
+                                checked(self::$options['_fallback'], 1, false)
+                            );
+                            _e('Use full size image as fallback? (Can produce extra http requests.)', 'wpri');
+                        ?>
+                        </label>
+                    </p>
+                    <p>
+                        <label for="cb_native">
+                        <?php
+                            printf('<input id="cb_native" type="checkbox" name="%s" value="1" %s>',
+                                self::$options_name.'[_native]',
+                                checked(self::$options['_native'], 1, false)
+                            );
+                            _e('Use native implementation? (Not yet recommended!)', 'wpri');
+                        ?>
+                        </label>
+                    </p>
                 </div>
                 <p class="submit">
                     <input type="submit" class="button-primary" value="<?php _e('Save Changes', 'wpri'); ?>" />
@@ -265,6 +264,7 @@ final class wpri {
         <?php
     }
 
+
     /**
      * Add picturefill.js
      * @author picturefill.js http://scottjehl.github.io/picturefill/
@@ -282,6 +282,7 @@ final class wpri {
         wp_enqueue_script('picturefill');
     }
 
+
     /**
      * Add data-responsive attribute
      */
@@ -293,6 +294,7 @@ final class wpri {
         );
         return $html;
     }
+
 
     /**
      * Filter all images with a data-responsive attribute
@@ -312,6 +314,7 @@ final class wpri {
 
         return $content;
     }
+
 
     /**
      * Replace images with srcset image markup
