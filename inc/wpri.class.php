@@ -304,7 +304,7 @@ final class wpri {
         if(empty(self::$options)) return $content;
 
         $content = preg_replace_callback(
-            '#<img.*?data-responsive=[\'"](.*?)[\'"](?:.*?class=[\'"](.*?)[\'"].*?)?.*?>#imsu',
+            '/<img.*?data-responsive=[\'"](.*?)[\'"].*?>/i',
             array(
                 $this,
                 'replace_responsive_images'
@@ -320,15 +320,24 @@ final class wpri {
      * Replace images with srcset image markup
      */
     public function replace_responsive_images($matches) {
+        $ori_markup = $matches[0];
         $image_id = intval($matches[1]);
 
         // Check image id
-        if(empty($image_id)) return $matches[0];
+        if(empty($image_id)) return $ori_markup;
 
         // Get class names
-        $class_names = (!empty($matches[2])) ?
-            $matches[2] :
+        preg_match('/class=[\'"](.*?)[\'"]/i', $ori_markup, $match);
+        $class_names = (!empty($match[1])) ?
+            sprintf(' class="%s"', $match[1]) :
             '';
+
+        // Check for fallback image
+        $img_fallback = '';
+        if(self::$options['_fallback']) {
+            $imgsrc_full = wp_get_attachment_image_src($image_id, 'full');
+            $img_fallback = sprintf(' src="%s"', $imgsrc_full[0]);
+        }
 
         // Collect all images
         foreach(self::$options as $key => $value) {
@@ -342,14 +351,8 @@ final class wpri {
             }
         }
 
-        $img_fallback = '';
-        if(self::$options['_fallback']) {
-            $imgsrc_full = wp_get_attachment_image_src($image_id, 'full');
-            $img_fallback = sprintf(' src="%s"', $imgsrc_full[0]);
-        }
-
         // srcset image markup
-        $markup = sprintf('<img class="%s"%s srcset="%s" sizes="%s100vw">',
+        $markup = sprintf('<img%s%s srcset="%s" sizes="%s100vw">',
             $class_names,
             $img_fallback,
             (isset($srcset)) ? trim(implode($srcset), ', ') : '',
