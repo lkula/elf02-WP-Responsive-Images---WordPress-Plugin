@@ -2,6 +2,9 @@
 
 Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original idea by [Tim Evko][2].
 
+## New in version 1.3.3
+* Option to load picturefill.js asynchronously.
+
 ## New in version 1.3.2
 * __Important regex bugfix.__
 * Option to use native implementation instead of picturefill.js.

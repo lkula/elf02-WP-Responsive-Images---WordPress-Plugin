@@ -40,7 +40,8 @@ final class wpri {
             'bp_pixel' => '0'
         ),
         '_fallback' => 0,
-        '_native' => 0
+        '_native' => 0,
+        '_async' => 1
     );
 
     private static $options_name = 'elf02_wp_responsive_images';
@@ -72,7 +73,7 @@ final class wpri {
         );
 
         foreach(self::$options as $key => $value) {
-            if(substr($key, 0, 1) != '_' && !empty($value['name']) && !empty($value['size'])) {
+            if(substr($key, 0, 1) !== '_' && !empty($value['name']) && !empty($value['size'])) {
                 $size = intval($value['size']);
                 add_image_size($value['name'], $size);
 
@@ -93,6 +94,19 @@ final class wpri {
                 )
             );
         }
+
+        if(self::$options['_async']) {
+            add_filter(
+                'clean_url',
+                array(
+                    $this,
+                    'async_picturefilljs'
+                ),
+                11,
+                1
+            );
+        }
+
 
         add_filter(
             'image_send_to_editor',
@@ -136,7 +150,7 @@ final class wpri {
      */
     public function init_options() {
         register_setting(
-            'responsive_images_options',
+            self::$options_name . '_options',
             self::$options_name,
             array(
                 $this,
@@ -151,7 +165,7 @@ final class wpri {
             'Responsive Images Options',
             'Responsive Images',
             'manage_options',
-            'responsive_images_options',
+            self::$options_name . '_options',
             array(
                 $this,
                 'options_do_page'
@@ -165,7 +179,7 @@ final class wpri {
      */
     public function validate($input) {
         foreach($input as $key => $value) {
-            if(substr($key, 0, 1) != '_') {
+            if(substr($key, 0, 1) !== '_') {
                 $input[$key]['name'] = sanitize_text_field($value['name']);
                 $input[$key]['size'] = intval($value['size']);
                 $input[$key]['bp_pixel'] = intval($value['bp_pixel']);
@@ -174,6 +188,7 @@ final class wpri {
 
         $input['_fallback'] = intval($input['_fallback']);
         $input['_native'] = intval($input['_native']);
+        $input['_async'] = intval($input['_async']);
 
         return $input;
     }
@@ -187,7 +202,7 @@ final class wpri {
         <div class="wrap">
             <h2><?php _e('Responsive Images Options', 'wpri'); ?></h2>
             <form method="post" action="options.php">
-                <?php settings_fields('responsive_images_options'); ?>
+                <?php settings_fields(self::$options_name . '_options'); ?>
                 <table class="widefat" style="width:500px;">
                 <thead>
                     <tr>
@@ -227,7 +242,7 @@ final class wpri {
                                 self::$options_name.'[_fallback]',
                                 checked(self::$options['_fallback'], 1, false)
                             );
-                            _e('Use full size image as fallback? (Can produce extra http requests.)', 'wpri');
+                            _e('Use full size image as fallback? This can produce extra http requests.', 'wpri');
                         ?>
                         </label>
                     </p>
@@ -238,7 +253,18 @@ final class wpri {
                                 self::$options_name.'[_native]',
                                 checked(self::$options['_native'], 1, false)
                             );
-                            _e('Use native implementation? (Not yet recommended!)', 'wpri');
+                            _e('Use native implementation? <strong>Not yet recommended!</strong>', 'wpri');
+                        ?>
+                        </label>
+                    </p>
+                    <p>
+                        <label for="cb_async">
+                        <?php
+                            printf('<input id="cb_async" type="checkbox" name="%s" value="1" %s>',
+                                self::$options_name.'[_async]',
+                                checked(self::$options['_async'], 1, false)
+                            );
+                            _e('Load picturefill.js asynchronously?', 'wpri');
                         ?>
                         </label>
                     </p>
@@ -254,10 +280,10 @@ final class wpri {
                     global $_wp_additional_image_sizes;
                     foreach($_wp_additional_image_sizes as $key => $value) {
                         $list[] = (!empty($key)) ?
-                            sprintf('<li><strong>%s=</strong>%s</li>', $key, $value['width']) :
+                            sprintf('<li><strong>%s=</strong>%spx</li>', $key, $value['width']) :
                             '';
                     }
-                    echo implode($list).'</ul>';
+                    printf('%s%s', implode($list), '</ul>');
                 ?>
             </div>
         </div>
@@ -266,8 +292,25 @@ final class wpri {
 
 
     /**
+     * Load picturefill.js asynchronously
+     */
+    public function async_picturefilljs($url) {
+        if(false === strpos($url, '.js')) {
+            return $url;
+        }
+
+        // only for picturefill.js.
+        if(strpos($url, 'picturefill')) {
+            return "$url' async onload='";
+        }
+
+        return $url;
+    }
+
+
+    /**
      * Add picturefill.js
-     * @author picturefill.js http://scottjehl.github.io/picturefill/
+     * picturefill.js - http://scottjehl.github.io/picturefill/
      */
     public function add_picturefilljs() {
         wp_register_script(
@@ -341,7 +384,7 @@ final class wpri {
 
         // Collect all images
         foreach(self::$options as $key => $value) {
-            if(substr($key, 0, 1) != '_' && !empty($value['name'])) {
+            if(substr($key, 0, 1) !== '_' && !empty($value['name'])) {
                 $imgsrc = wp_get_attachment_image_src($image_id, $value['name']);
                 $imgsrc_2x = wp_get_attachment_image_src($image_id, $value['name'].'@2x');
                 $srcset[] = sprintf('%s %sw, %s %sw, ', $imgsrc[0], $value['size'], $imgsrc_2x[0], $value['size2x']);
