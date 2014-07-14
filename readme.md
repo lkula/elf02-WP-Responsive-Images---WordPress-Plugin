@@ -2,6 +2,8 @@
 
 Responsive image solution using picturefill.js v2 by [Scott Jehl][1]. Original idea by [Tim Evko][2].
 
+**Improved and more flexible version: [RespImage][7]**
+
 ## New in version 1.3.3
 * Option to load picturefill.js asynchronously.
 
@@ -40,3 +42,4 @@ Plugin Page: [elf02 WP Responsive Images - WordPress Plugin][3]
   [4]: http://wordpress.org/plugins/regenerate-thumbnails/
   [5]: http://visuellegedanken.de/
   [6]: https://github.com/scottjehl/picturefill/releases/tag/2.0.0
+  [7]: http://elf02.de/2014/07/14/respimage-wordpress-plugin/
