@@ -345,6 +345,8 @@ final class wpri {
     public function filter_responsive_images($content) {
         // Check for empty options
         if(empty(self::$options)) return $content;
+        // Check for feed
+        if(is_feed()) return $content;
 
         $content = preg_replace_callback(
             '/<img.*?data-responsive=[\'"](.*?)[\'"].*?>/i',
