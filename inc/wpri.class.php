@@ -178,19 +178,21 @@ final class wpri {
      * Validate and sanitize options
      */
     public function validate($input) {
+        $valid = array();
+
         foreach($input as $key => $value) {
             if(substr($key, 0, 1) !== '_') {
-                $input[$key]['name'] = sanitize_text_field($value['name']);
-                $input[$key]['size'] = intval($value['size']);
-                $input[$key]['bp_pixel'] = intval($value['bp_pixel']);
+                $valid[$key]['name'] = sanitize_text_field($value['name']);
+                $valid[$key]['size'] = intval($value['size']);
+                $valid[$key]['bp_pixel'] = intval($value['bp_pixel']);
             }
         }
 
-        $input['_fallback'] = intval($input['_fallback']);
-        $input['_native'] = intval($input['_native']);
-        $input['_async'] = intval($input['_async']);
+        $valid['_fallback'] = (isset($input['_fallback'])) ? intval($input['_fallback']) : 0;
+        $valid['_native'] = (isset($input['_native'])) ? intval($input['_native']) : 0;
+        $valid['_async'] =  (isset($input['_async'])) ? intval($input['_async']) : 0;
 
-        return $input;
+        return $valid;
     }
 
 
