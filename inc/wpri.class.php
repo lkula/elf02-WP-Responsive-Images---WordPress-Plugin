@@ -1,6 +1,6 @@
 <?php
 
-defined('ABSPATH') OR exit;
+defined( 'ABSPATH' ) OR exit;
 
 
 final class wpri {
