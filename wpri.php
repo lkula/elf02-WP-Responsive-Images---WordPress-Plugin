@@ -10,11 +10,11 @@ Author URI: http://elf02.de
 License: MIT
 */
 
-defined( 'ABSPATH' ) OR exit;
+defined('ABSPATH') OR exit;
 
-define( 'WPRI_FILE', __FILE__ );
-define( 'WPRI_PLUGIN_DIR', untrailingslashit( plugin_dir_path( WPRI_FILE ) ) );
-define( 'WPRI_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( WPRI_FILE ) ), basename( WPRI_FILE ) ) ) );
+define('WPRI_FILE', __FILE__);
+define('WPRI_PLUGIN_DIR', untrailingslashit(plugin_dir_path(WPRI_FILE)));
+define('WPRI_PLUGIN_URL', untrailingslashit(plugins_url(basename(plugin_dir_path(WPRI_FILE)), basename(WPRI_FILE))));
 
 
 require_once(
